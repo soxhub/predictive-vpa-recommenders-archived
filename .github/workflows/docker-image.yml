@@ -33,7 +33,7 @@ jobs:
       id: push-to-quay
       uses: redhat-actions/push-to-registry@v2
       with:
-        image: ${{ github.event.repository.name }}
+        image: ${{ steps.downcase-repository-name.outputs.lowercase  }}
         tags: ${{ steps.build-image.outputs.tags }}
         registry: quay.io/soxhub
         username: ${{ secrets.REGISTRY_USERNAME }}
