@@ -1,0 +1,43 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ '*' ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - id: downcase-repository-name
+      uses: ASzc/change-string-case-action@v1
+      with:
+        string: predictive-vpa-recommender
+
+    - name: Build Image
+      id: build-image
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: ${{ steps.downcase-repository-name.outputs.lowercase  }}
+        tags: latest ${{ github.sha }}
+        dockerfiles: |
+          ./Dockerfile
+
+    # Podman Login action (https://github.com/redhat-actions/podman-login) also be used to log in,
+    # in which case 'username' and 'password' can be omitted.
+    - name: Push To quay.io
+      id: push-to-quay
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: ${{ github.event.repository.name }}
+        tags: ${{ steps.build-image.outputs.tags }}
+        registry: quay.io/soxhub
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Print image url
+      run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
