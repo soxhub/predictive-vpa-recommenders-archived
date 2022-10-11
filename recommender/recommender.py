@@ -107,10 +107,7 @@ def get_recommendation(vpa, corev1, prom_client):
     print(target_ref)
 
     # Retrieve the target pods
-    if "namespace" in target_ref.keys():
-        target_namespace = target_ref["namespace"]
-    else:
-        target_namespace = recommender_config.DEFAULT_NAMESPACE
+    target_namespace = vpa["metadata"]["namespace"]
 
     # Build the prometheus query for the target resources of target containers in target pods
     namespace_query = "namespace=\'" + target_namespace + "\'"
